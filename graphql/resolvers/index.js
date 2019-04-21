@@ -43,11 +43,11 @@ module.exports = {
     }
   }
   */
-  events: () => {
-    return Event.find().then(events => {
-      console.log(events)
-      // ._doc leaves out all meta data
-      return events.map(event => ({
+  events: async () => {
+    try {
+      const dbEvents = await Event.find()
+      console.log(dbEvents)
+      return dbEvents.map(event => ({
         ...event._doc,
         _id: event.id,
         date: new Date(event._doc.date).toISOString(),
@@ -56,10 +56,10 @@ module.exports = {
         // Graphql will see if a property is a function and will execute it and return its value
         creator: getUserById.bind(this, event._doc.creator)
       }))
-    }).catch(err => {
+    } catch(err) {
       console.log(err)
       throw err
-    })
+    }
   },
   /*
   mutation {
