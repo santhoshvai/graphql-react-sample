@@ -10,6 +10,7 @@ const getEventsByIds = async eventIds => {
     return dbEvents.map(event => ({
       ...event._doc,
       _id: event.id,
+      date: new Date(event._doc.date).toISOString(),
       creator: getUserById.bind(this, event._doc.creator)
     }))
   } catch (error) {
@@ -49,6 +50,7 @@ module.exports = {
       return events.map(event => ({
         ...event._doc,
         _id: event.id,
+        date: new Date(event._doc.date).toISOString(),
         // bind creates a new function from another function
         // Santhosh: LAZY evaluated function basically, only done when creator is asked for
         // Graphql will see if a property is a function and will execute it and return its value
@@ -90,6 +92,7 @@ module.exports = {
       return {
         ...savedEvent._doc,
         _id: savedEvent.id,
+        date: new Date(savedEvent._doc.date).toISOString(),
         creator: getUserById.bind(this, savedEvent._doc.creator)
       }
     } catch(error) {
