@@ -31,12 +31,14 @@ app.use('/graphql', graphqlHttp({
       description: String!
       price: Float!
       date: String!
+      creator: User!
     }
 
     type User {
       _id: ID!
       email: String!
       password: String
+      createdEvents: [Event!]
     }
 
     input UserInput {
@@ -76,10 +78,20 @@ app.use('/graphql', graphqlHttp({
     }
     */
     events: () => {
-      return Event.find().then(events => {
+      // populate will go to mongodb and populate the refs specified
+      // in this case creator will be got
+      return Event.find().populate('creator').then(events => {
         console.log(events)
         // ._doc leaves out all meta data
-        return events.map(event => ({ ...event._doc, _id: event.id }))
+        return events.map(event => ({
+          ...event._doc,
+          _id: event.id,
+          creator: {
+            ...event._doc.creator._doc,
+            _id: event._doc.creator.id,
+            password: null,
+          }
+        }))
       }).catch(err => {
         console.log(err)
         throw err
