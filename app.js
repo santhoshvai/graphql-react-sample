@@ -23,6 +23,20 @@ mongoose.connect(`mongodb+srv://${MONGO_USER}:${MANGO_PASSWORD}@cluster0-abeh6.m
 // parse incoming json bodies
 app.use(bodyParser.json())
 
+const getUserById = async userId => {
+  try {
+    const user = await User.findById(userId)
+    return {
+      ...user._doc,
+      _id: user.id,
+      password: null,
+    }
+  } catch(error) {
+    console.log(error)
+    throw error
+  }
+}
+
 app.use('/graphql', graphqlHttp({
   schema: buildSchema(`
     type Event {
@@ -78,19 +92,16 @@ app.use('/graphql', graphqlHttp({
     }
     */
     events: () => {
-      // populate will go to mongodb and populate the refs specified
-      // in this case creator will be got
-      return Event.find().populate('creator').then(events => {
+      return Event.find().then(events => {
         console.log(events)
         // ._doc leaves out all meta data
         return events.map(event => ({
           ...event._doc,
           _id: event.id,
-          creator: {
-            ...event._doc.creator._doc,
-            _id: event._doc.creator.id,
-            password: null,
-          }
+          // bind creates a new function from another function but for this case also avoid to be called before passing down.
+          // another approach is to bind the function automatically and pass parameters without execute the function is using double arrow function  const user = (userId) => () => { ... } this way you can pass a parameter without executing. userId("sss"); <= won't execute at the runtime but can be executed inside the promise.﻿
+          // Santhosh: LAZY evaluated function basically, only done when creator is asked for
+          creator: getUserById.bind(this, event._doc.creator)
         }))
       }).catch(err => {
         console.log(err)
@@ -120,7 +131,6 @@ app.use('/graphql', graphqlHttp({
         // push the event to the user database (not the id)
         const user = await User.findById(creatorUserId)
         if (!user) {
-          // dont allow users with same user id
           throw new Error('User Doesnt exist')
         }
         user.createdEvents.push(savedEvent._id)
