@@ -23,6 +23,22 @@ mongoose.connect(`mongodb+srv://${MONGO_USER}:${MANGO_PASSWORD}@cluster0-abeh6.m
 // parse incoming json bodies
 app.use(bodyParser.json())
 
+const getEventsByIds = async eventIds => {
+  try {
+    const dbEvents = await Event.find({
+      _id: {$in: eventIds}
+    })
+    return dbEvents.map(event => ({
+      ...event._doc,
+      _id: event.id,
+      creator: getUserById.bind(this, event._doc.creator)
+    }))
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
 const getUserById = async userId => {
   try {
     const user = await User.findById(userId)
@@ -30,6 +46,7 @@ const getUserById = async userId => {
       ...user._doc,
       _id: user.id,
       password: null,
+      createdEvents: getEventsByIds.bind(this, user._doc.createdEvents)
     }
   } catch(error) {
     console.log(error)
@@ -98,9 +115,9 @@ app.use('/graphql', graphqlHttp({
         return events.map(event => ({
           ...event._doc,
           _id: event.id,
-          // bind creates a new function from another function but for this case also avoid to be called before passing down.
-          // another approach is to bind the function automatically and pass parameters without execute the function is using double arrow function  const user = (userId) => () => { ... } this way you can pass a parameter without executing. userId("sss"); <= won't execute at the runtime but can be executed inside the promise.﻿
+          // bind creates a new function from another function
           // Santhosh: LAZY evaluated function basically, only done when creator is asked for
+          // Graphql will see if a property is a function and will execute it and return its value
           creator: getUserById.bind(this, event._doc.creator)
         }))
       }).catch(err => {
@@ -136,7 +153,11 @@ app.use('/graphql', graphqlHttp({
         user.createdEvents.push(savedEvent._id)
         user.save()
         // return the event
-        return { ...savedEvent._doc, _id: savedEvent.id }
+        return {
+          ...savedEvent._doc,
+          _id: savedEvent.id,
+          creator: getUserById.bind(this, savedEvent._doc.creator)
+        }
       } catch(error) {
         console.log(error)
         throw error
