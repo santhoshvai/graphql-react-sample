@@ -20,6 +20,21 @@ const getEventsByIds = async eventIds => {
   }
 }
 
+const getEventById = async eventId => {
+  try {
+    const dbEvent = await Event.findById(eventId)
+    return {
+      ...dbEvent._doc,
+      _id: dbEvent.id,
+      date: new Date(dbEvent._doc.date).toISOString(),
+      creator: getUserById.bind(this, dbEvent._doc.creator)
+    }
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
 const getUserById = async userId => {
   try {
     const user = await User.findById(userId)
@@ -69,6 +84,8 @@ module.exports = {
       return dbBookings.map(booking => ({
         ...booking._doc,
         _id: booking.id,
+        user: getUserById.bind(this, booking._doc.user),
+        event: getEventById.bind(this, booking._doc.event),
         createdAt: new Date(booking._doc.createdAt).toISOString(),
         updatedAt: new Date(booking._doc.updatedAt).toISOString(),
       }))
@@ -168,6 +185,8 @@ module.exports = {
       return {
         ...result._doc,
         _id: result.id,
+        user: getUserById.bind(this, booking._doc.user),
+        event: getEventById.bind(this, booking._doc.event),
         createdAt: new Date(result._doc.createdAt).toISOString(),
         updatedAt: new Date(result._doc.updatedAt).toISOString(),
       }
