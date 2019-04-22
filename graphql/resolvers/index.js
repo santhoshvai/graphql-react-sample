@@ -195,4 +195,28 @@ module.exports = {
       throw error
     }
   },
+  /*
+  mutation {
+    cancelBooking(eventId: "5cb78409c7d4e59672644537") {
+      _id
+      createdId
+    }
+  }
+  */
+ cancelBooking: async args => {
+  try {
+    const dbBooking = await Booking.findById(args.bookingId).populate('event')
+    console.log(dbBooking)
+    const event = {
+      ...dbBooking.event._doc,
+      _id: dbBooking.event.id,
+      creator: getUserById.bind(this, dbBooking.event._doc.creator),
+    }
+    await Booking.deleteOne({ _id: args.bookingId })
+    return event
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+},
 }
