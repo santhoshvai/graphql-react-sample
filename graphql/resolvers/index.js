@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const Event = require('../../models/event')
 const User = require('../../models/user')
+const Booking = require('../../models/booking')
 
 const getEventsByIds = async eventIds => {
   try {
@@ -57,6 +58,21 @@ module.exports = {
         creator: getUserById.bind(this, event._doc.creator)
       }))
     } catch(err) {
+      console.log(err)
+      throw err
+    }
+  },
+  bookings: async () => {
+    try {
+      const dbBookings = await Booking.find()
+      console.log(dbBookings)
+      return dbBookings.map(booking => ({
+        ...booking._doc,
+        _id: booking.id,
+        createdAt: new Date(booking._doc.createdAt).toISOString(),
+        updatedAt: new Date(booking._doc.updatedAt).toISOString(),
+      }))
+    } catch(error) {
       console.log(err)
       throw err
     }
@@ -128,7 +144,36 @@ module.exports = {
         return ({ ...savedUser._doc, password: null, _id: savedUser.id })
       } catch (error) {
         console.error(error)
+        throw error
       }
     }
-  }
+  },
+  /*
+    mutation {
+      bookEvent(eventId: "5cb78409c7d4e59672644537") {
+        _id
+        createdId
+      }
+    }
+  */
+  bookEvent: async args => {
+    try {
+      const creatorUserId = '5cb77fce4bf56a9636155922'
+      const dbEvent = await Event.findOne({ _id: args.eventId })
+      const booking = new Booking({
+        user: creatorUserId,
+        event: dbEvent,
+      })
+      const result = await booking.save()
+      return {
+        ...result._doc,
+        _id: result.id,
+        createdAt: new Date(result._doc.createdAt).toISOString(),
+        updatedAt: new Date(result._doc.updatedAt).toISOString(),
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  },
 }
