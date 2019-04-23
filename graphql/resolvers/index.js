@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const Event = require('../../models/event')
 const User = require('../../models/user')
 const Booking = require('../../models/booking')
@@ -90,8 +91,8 @@ module.exports = {
         updatedAt: new Date(booking._doc.updatedAt).toISOString(),
       }))
     } catch(error) {
-      console.log(err)
-      throw err
+      console.log(error)
+      throw error
     }
   },
   /*
@@ -204,19 +205,42 @@ module.exports = {
   }
   */
  cancelBooking: async args => {
-  try {
-    const dbBooking = await Booking.findById(args.bookingId).populate('event')
-    console.log(dbBooking)
-    const event = {
-      ...dbBooking.event._doc,
-      _id: dbBooking.event.id,
-      creator: getUserById.bind(this, dbBooking.event._doc.creator),
+    try {
+      const dbBooking = await Booking.findById(args.bookingId).populate('event')
+      console.log(dbBooking)
+      const event = {
+        ...dbBooking.event._doc,
+        _id: dbBooking.event.id,
+        creator: getUserById.bind(this, dbBooking.event._doc.creator),
+      }
+      await Booking.deleteOne({ _id: args.bookingId })
+      return event
+    } catch (error) {
+      console.error(error)
+      throw error
     }
-    await Booking.deleteOne({ _id: args.bookingId })
-    return event
-  } catch (error) {
-    console.error(error)
-    throw error
+  },
+    /*
+    query {
+      login(email: "karthick@kk.com", password: "testing") {
+        userId
+        token
+        tokenExpiration
+      }
+    }
+  */
+  login: async ({email, password }) => {
+    const user = await User.findOne({ email })
+    if (!user) {
+      throw new Error('User does not exist!')
+    }
+    const isEqual = await bcrypt.compare(password, user.password)
+    if (!isEqual) {
+      throw new Error('Password is incorrect!')
+    }
+    const token = jwt.sign({ userId: user.id, email: user.email }, 'some-super-secret-key', {
+      expiresIn: '1h'
+    })
+    return { userId: user.id, token, tokenExpiration: 1 }
   }
-},
 }
