@@ -104,7 +104,10 @@ module.exports = {
     }
   }
   */
-  createEvent: async (args) => {
+  createEvent: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated')
+    }
     const creatorUserId = '5cb77fce4bf56a9636155922'
     const event = new Event({
       ...args.eventInput,

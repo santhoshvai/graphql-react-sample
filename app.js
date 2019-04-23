@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 
 const graphqlSchema = require('./graphql/schema/index')
 const graphqlResolvers = require('./graphql/resolvers/index')
+const isAuth = require('./middleware/is-auth')
 
 const app = express()
 
@@ -20,6 +21,9 @@ mongoose.connect(`mongodb+srv://${MONGO_USER}:${MANGO_PASSWORD}@cluster0-abeh6.m
 
 // parse incoming json bodies
 app.use(bodyParser.json())
+
+// express will run isAuth on every incoming request
+app.use(isAuth)
 
 app.use('/graphql', graphqlHttp({
   schema: graphqlSchema,
