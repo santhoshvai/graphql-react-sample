@@ -29,20 +29,25 @@ module.exports = {
       date
     }
   }
+  {
+	"query": "mutation { createEvent(eventInput: {title: \"should work\", description: \"This works?\", price: 39.99, date: \"2019-04-27T18:39:03.101Z\"} ) { _id title } }"
+  }
   */
-  createEvent: async (args) => {
-    const creatorUserId = '5cb77fce4bf56a9636155922'
+ createEvent: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated')
+    }
     const event = new Event({
       ...args.eventInput,
       // parse from string to JS Date
       date: new Date(args.eventInput.date),
-      creator: creatorUserId // mongoose will convert string to objectId
+      creator: req.userId // mongoose will convert string to objectId
     })
     // hit DB and save it
     try {
       const savedEvent = await event.save()
       // push the event to the user database (not the id)
-      const user = await User.findById(creatorUserId)
+      const user = await User.findById(req.userId)
       if (!user) {
         throw new Error('User Doesnt exist')
       }
