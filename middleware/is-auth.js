@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
     return next()
   }
   // Authorization: Bearer [toekn-value]
-  const token = authHeader.split(' ')
+  const token = authHeader.split(' ')[1]
   if (!token) {
     req.isAuth = false
     return next()
