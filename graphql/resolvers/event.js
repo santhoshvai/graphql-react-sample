@@ -37,18 +37,17 @@ module.exports = {
     if (!req.isAuth) {
       throw new Error('Unauthenticated')
     }
-    const creatorUserId = '5cb77fce4bf56a9636155922'
     const event = new Event({
       ...args.eventInput,
       // parse from string to JS Date
       date: new Date(args.eventInput.date),
-      creator: creatorUserId // mongoose will convert string to objectId
+      creator: req.userId // mongoose will convert string to objectId
     })
     // hit DB and save it
     try {
       const savedEvent = await event.save()
       // push the event to the user database (not the id)
-      const user = await User.findById(creatorUserId)
+      const user = await User.findById(req.userId)
       if (!user) {
         throw new Error('User Doesnt exist')
       }

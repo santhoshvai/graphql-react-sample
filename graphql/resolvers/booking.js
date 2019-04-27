@@ -21,10 +21,9 @@ module.exports = {
       throw new Error('Unauthenticated')
     }
     try {
-      const creatorUserId = '5cb77fce4bf56a9636155922'
       const dbEvent = await Event.findOne({ _id: args.eventId })
       const booking = new Booking({
-        user: creatorUserId,
+        user: req.userId,
         event: dbEvent,
       })
       const result = await booking.save()
