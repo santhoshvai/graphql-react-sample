@@ -2,12 +2,13 @@ const bcrypt = require('bcryptjs')
 const Event = require('../../models/event')
 const User = require('../../models/user')
 const Booking = require('../../models/booking')
+const { dateToString } = require('../../helpers/date')
 
 const transformEvent = dbEvent => {
   return {
     ...dbEvent._doc,
     _id: dbEvent.id,
-    date: new Date(dbEvent._doc.date).toISOString(),
+    date: dateToString(dbEvent._doc.date),
     // bind creates a new function from another function
     // Santhosh: LAZY evaluated function basically, only done when creator is asked for
     // Graphql will see if a property is a function and will execute it and return its value
@@ -79,8 +80,8 @@ module.exports = {
         _id: booking.id,
         user: getUserById.bind(this, booking._doc.user),
         event: getEventById.bind(this, booking._doc.event),
-        createdAt: new Date(booking._doc.createdAt).toISOString(),
-        updatedAt: new Date(booking._doc.updatedAt).toISOString(),
+        createdAt: dateToString(booking._doc.createdAt),
+        updatedAt: dateToString(booking._doc.updatedAt),
       }))
     } catch(error) {
       console.log(err)
@@ -175,8 +176,8 @@ module.exports = {
         _id: result.id,
         user: getUserById.bind(this, booking._doc.user),
         event: getEventById.bind(this, booking._doc.event),
-        createdAt: new Date(result._doc.createdAt).toISOString(),
-        updatedAt: new Date(result._doc.updatedAt).toISOString(),
+        createdAt: dateToString(result._doc.createdAt),
+        updatedAt: dateToString(result._doc.updatedAt),
       }
     } catch (error) {
       console.error(error)
