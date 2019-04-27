@@ -3,7 +3,10 @@ const Booking = require('../../models/booking')
 const { transformEvent, transformBooking } = require('./utils')
 
 module.exports = {
-  bookings: async () => {
+  bookings: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated')
+    }
     try {
       const dbBookings = await Booking.find()
       console.log(dbBookings)
@@ -13,7 +16,10 @@ module.exports = {
       throw error
     }
   },
-  bookEvent: async args => {
+  bookEvent: async (args, req) => {
+    if (!req.isAuth) {
+      throw new Error('Unauthenticated')
+    }
     try {
       const creatorUserId = '5cb77fce4bf56a9636155922'
       const dbEvent = await Event.findOne({ _id: args.eventId })
@@ -36,7 +42,10 @@ module.exports = {
     }
   }
   */
- cancelBooking: async args => {
+ cancelBooking: async (args, req) => {
+  if (!req.isAuth) {
+    throw new Error('Unauthenticated')
+  }
   try {
     // when using populate, mongoose will populate the right event reference for us
     const dbBooking = await Booking.findById(args.bookingId).populate('event')
