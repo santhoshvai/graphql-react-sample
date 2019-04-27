@@ -29,6 +29,9 @@ module.exports = {
       date
     }
   }
+  {
+	"query": "mutation { createEvent(eventInput: {title: \"should work\", description: \"This works?\", price: 39.99, date: \"2019-04-27T18:39:03.101Z\"} ) { _id title } }"
+  }
   */
  createEvent: async (args, req) => {
     if (!req.isAuth) {

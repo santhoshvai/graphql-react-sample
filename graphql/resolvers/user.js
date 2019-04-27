@@ -36,6 +36,11 @@ module.exports = {
       }
     }
   },
+  /*
+  {
+    "query": "query { login(email: \"karthick@kk.com\", password: \"testing\") { token }}"
+  }
+  */
   login: async ({email, password }) => {
     const user = await User.findOne({ email })
     if (!user) {
