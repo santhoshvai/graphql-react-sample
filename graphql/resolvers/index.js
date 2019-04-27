@@ -3,17 +3,23 @@ const Event = require('../../models/event')
 const User = require('../../models/user')
 const Booking = require('../../models/booking')
 
+const transformEvent = dbEvent => {
+  return {
+    ...dbEvent._doc,
+    _id: dbEvent.id,
+    date: new Date(dbEvent._doc.date).toISOString(),
+    // bind creates a new function from another function
+    // Santhosh: LAZY evaluated function basically, only done when creator is asked for
+    // Graphql will see if a property is a function and will execute it and return its value
+    creator: getUserById.bind(this, dbEvent._doc.creator)
+  }
+}
 const getEventsByIds = async eventIds => {
   try {
     const dbEvents = await Event.find({
       _id: {$in: eventIds}
     })
-    return dbEvents.map(event => ({
-      ...event._doc,
-      _id: event.id,
-      date: new Date(event._doc.date).toISOString(),
-      creator: getUserById.bind(this, event._doc.creator)
-    }))
+    return dbEvents.map(event => transformEvent(event))
   } catch (error) {
     console.log(error)
     throw error
@@ -23,12 +29,7 @@ const getEventsByIds = async eventIds => {
 const getEventById = async eventId => {
   try {
     const dbEvent = await Event.findById(eventId)
-    return {
-      ...dbEvent._doc,
-      _id: dbEvent.id,
-      date: new Date(dbEvent._doc.date).toISOString(),
-      creator: getUserById.bind(this, dbEvent._doc.creator)
-    }
+    return transformEvent(dbEvent)
   } catch (error) {
     console.log(error)
     throw error
@@ -63,15 +64,7 @@ module.exports = {
     try {
       const dbEvents = await Event.find()
       console.log(dbEvents)
-      return dbEvents.map(event => ({
-        ...event._doc,
-        _id: event.id,
-        date: new Date(event._doc.date).toISOString(),
-        // bind creates a new function from another function
-        // Santhosh: LAZY evaluated function basically, only done when creator is asked for
-        // Graphql will see if a property is a function and will execute it and return its value
-        creator: getUserById.bind(this, event._doc.creator)
-      }))
+      return dbEvents.map(event => transformEvent(event))
     } catch(err) {
       console.log(err)
       throw err
@@ -122,12 +115,7 @@ module.exports = {
       user.createdEvents.push(savedEvent._id)
       user.save()
       // return the event
-      return {
-        ...savedEvent._doc,
-        _id: savedEvent.id,
-        date: new Date(savedEvent._doc.date).toISOString(),
-        creator: getUserById.bind(this, savedEvent._doc.creator)
-      }
+      return transformEvent(savedEvent)
     } catch(error) {
       console.log(error)
       throw error
@@ -207,11 +195,7 @@ module.exports = {
   try {
     const dbBooking = await Booking.findById(args.bookingId).populate('event')
     console.log(dbBooking)
-    const event = {
-      ...dbBooking.event._doc,
-      _id: dbBooking.event.id,
-      creator: getUserById.bind(this, dbBooking.event._doc.creator),
-    }
+    const event = transformEvent(dbBooking.event)
     await Booking.deleteOne({ _id: args.bookingId })
     return event
   } catch (error) {
