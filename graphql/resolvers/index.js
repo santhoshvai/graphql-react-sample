@@ -4,17 +4,25 @@ const User = require('../../models/user')
 const Booking = require('../../models/booking')
 const { dateToString } = require('../../helpers/date')
 
-const transformEvent = dbEvent => {
-  return {
-    ...dbEvent._doc,
-    _id: dbEvent.id,
-    date: dateToString(dbEvent._doc.date),
-    // bind creates a new function from another function
-    // Santhosh: LAZY evaluated function basically, only done when creator is asked for
-    // Graphql will see if a property is a function and will execute it and return its value
-    creator: getUserById.bind(this, dbEvent._doc.creator)
-  }
-}
+const transformEvent = dbEvent => ({
+  ...dbEvent._doc,
+  _id: dbEvent.id,
+  date: dateToString(dbEvent._doc.date),
+  // bind creates a new function from another function
+  // Santhosh: LAZY evaluated function basically, only done when creator is asked for
+  // Graphql will see if a property is a function and will execute it and return its value
+  creator: getUserById.bind(this, dbEvent._doc.creator)
+})
+
+const transformBooking = dbBooking => ({
+  ...dbBooking._doc,
+  _id: dbBooking.id,
+  user: getUserById.bind(this, dbBooking._doc.user),
+  event: getEventById.bind(this, dbBooking._doc.event),
+  createdAt: dateToString(dbBooking._doc.createdAt),
+  updatedAt: dateToString(dbBooking._doc.updatedAt),
+})
+
 const getEventsByIds = async eventIds => {
   try {
     const dbEvents = await Event.find({
@@ -75,17 +83,10 @@ module.exports = {
     try {
       const dbBookings = await Booking.find()
       console.log(dbBookings)
-      return dbBookings.map(booking => ({
-        ...booking._doc,
-        _id: booking.id,
-        user: getUserById.bind(this, booking._doc.user),
-        event: getEventById.bind(this, booking._doc.event),
-        createdAt: dateToString(booking._doc.createdAt),
-        updatedAt: dateToString(booking._doc.updatedAt),
-      }))
+      return dbBookings.map(booking => transformBooking(booking))
     } catch(error) {
-      console.log(err)
-      throw err
+      console.log(error)
+      throw error
     }
   },
   /*
@@ -171,14 +172,7 @@ module.exports = {
         event: dbEvent,
       })
       const result = await booking.save()
-      return {
-        ...result._doc,
-        _id: result.id,
-        user: getUserById.bind(this, booking._doc.user),
-        event: getEventById.bind(this, booking._doc.event),
-        createdAt: dateToString(result._doc.createdAt),
-        updatedAt: dateToString(result._doc.updatedAt),
-      }
+      return transformBooking(result)
     } catch (error) {
       console.error(error)
       throw error
@@ -194,6 +188,7 @@ module.exports = {
   */
  cancelBooking: async args => {
   try {
+    // when using populate, mongoose will populate the right event reference for us
     const dbBooking = await Booking.findById(args.bookingId).populate('event')
     console.log(dbBooking)
     const event = transformEvent(dbBooking.event)
