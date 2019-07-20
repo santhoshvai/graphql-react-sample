@@ -11,7 +11,7 @@ function App() {
     <BrowserRouter>
         <React.Fragment>
             <MainNavigation />
-            <main>
+            <main className="main-content">
                 {/*switch is responsible for matching the first path and going to that */}
                 <Switch>
                     {/*without exact, "/" will be used as a prefix, even /events will redirect to auth*/}
