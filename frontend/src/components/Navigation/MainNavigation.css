@@ -10,7 +10,7 @@
     align-items: center;
 }
 
-.main-navigation__logo {
+.main-navigation__logo h1 {
     margin: 0;
     font-size: 1.5rem;
 }
