@@ -34,6 +34,15 @@ class AuthPage extends Component {
       headers: {
         'Content-Type': 'application/json'
       }
+    }).then(res => {
+      if (res.status !== 200 && res.status !== 201) {
+        throw new Error('Failed')
+      }
+      return res.json()
+    }).then(jsonData => {
+      console.log(jsonData)
+    }).catch(err => {
+      console.log(err)
     })
   }
 
