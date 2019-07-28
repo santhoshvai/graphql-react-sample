@@ -14,4 +14,13 @@ npm install
 npm start
 ```
 
-visit http://localhost:3000/graphql to test the graphql operations
+visit http://localhost:8000/graphql to test the graphql operations
+
+## Start Frontend
+
+```
+cd frontend
+npm start
+```
+
+visit http://localhost:3000
