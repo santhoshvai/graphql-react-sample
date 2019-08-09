@@ -38,8 +38,6 @@ class App extends React.Component {
                   {/*switch is responsible for matching the first path and going to that */}
                   <Switch>
                       {/*without exact, "/" will be used as a prefix, even /events will redirect to auth*/}
-                      {/*go to auth only when not authenticated*/}
-                      {!this.state.token && <Redirect from="/" to="/auth" exact />}
                       {/*go to events by default when authenticated*/}
                       {this.state.token && <Redirect from="/" to="/events" exact />}
                       {/*redirect from auth to events when authenticated -- happens after login, but when typed to browser whole page refreshes and the state is lost*/}
@@ -53,6 +51,8 @@ class App extends React.Component {
                       {this.state.token && (
                         <Route path="/bookings" component={BookingsPage} />
                       )}
+                      {/*go to auth when not authenticated, except in case of events*/}
+                      {!this.state.token && <Redirect to="/auth" exact />}
                   </Switch>
               </main>
             </AuthContext.Provider>
