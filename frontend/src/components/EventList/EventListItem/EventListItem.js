@@ -5,15 +5,15 @@ import AuthContext from '../../../context/auth-context'
 class EventListItem extends React.Component {
   static contextType = AuthContext
   render() {
-    const { title, price, creator } = this.props.event
+    const { title, price, creator, date } = this.props.event
     const authUserId = this.context.userId
     const isOwner = creator._id === authUserId
-
+    const dateStr = (new Date(date)).toLocaleDateString()
     return (
       <li className="event__list__item">
         <div>
           <h1>{title}</h1>
-          <h2>{`$${price}`}</h2>
+          <h2>{`$${price} - ${dateStr}`}</h2>
         </div>
         <div>
           {!isOwner && <button className={"btn"}>View Details</button>}
