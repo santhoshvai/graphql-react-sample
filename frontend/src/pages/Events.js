@@ -4,11 +4,13 @@ import Backdrop from '../components/Backdrop/Backdrop'
 import './Events.css'
 import AuthContext from '../context/auth-context';
 import EventList from '../components/EventList/EventList'
+import Spinner from '../components/Spinner/Spinner'
 
 class EventsPage extends Component {
   state = {
     creating: false,
-    events: []
+    events: [],
+    isLoading: false
   }
 
   // react will automatically populate this.context now
@@ -94,6 +96,7 @@ class EventsPage extends Component {
   }
 
   fetchEvents() {
+    this.setState({ isLoading: true })
     const requestBody = {
       query: `
         query {
@@ -125,9 +128,10 @@ class EventsPage extends Component {
       return res.json()
     }).then(resData => {
       const events = resData.data.events
-      this.setState({ events })
+      this.setState({ events, isLoading: false })
     }).catch(err => {
       console.log(err)
+      this.setState({ isLoading: false })
     })
   }
 
@@ -163,7 +167,7 @@ class EventsPage extends Component {
           <p>Share your own Events!</p>
           <button className="btn" onClick={this.createEventHandler}>Create Event</button>
         </div>}
-        <EventList events={this.state.events} />
+        {this.state.isLoading ? <Spinner /> : <EventList events={this.state.events} />}
       </React.Fragment>
     )
   }
