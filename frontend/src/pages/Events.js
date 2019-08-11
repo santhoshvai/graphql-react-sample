@@ -6,7 +6,8 @@ import AuthContext from '../context/auth-context';
 
 class EventsPage extends Component {
   state = {
-    creating: false
+    creating: false,
+    events: []
   }
 
   // react will automatically populate this.context now
@@ -18,6 +19,10 @@ class EventsPage extends Component {
     this.priceEl = React.createRef()
     this.dateEl = React.createRef()
     this.descriptionEl = React.createRef()
+  }
+
+  componentDidMount() {
+    this.fetchEvents()
   }
 
   createEventHandler = () => {
@@ -71,13 +76,54 @@ class EventsPage extends Component {
       }
       return res.json()
     }).then(resData => {
-      console.log(resData)
+      this.fetchEvents()
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
+  fetchEvents() {
+    const requestBody = {
+      query: `
+        query {
+          events {
+            _id
+            title
+            description
+            price
+            date
+            creator {
+              _id
+              email
+            }
+          }
+        }
+      `
+    }
+
+    fetch('http://localhost:8000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(res => {
+      if (res.status !== 200 && res.status !== 201) {
+        throw new Error('Failed')
+      }
+      return res.json()
+    }).then(resData => {
+      const events = resData.data.events
+      this.setState({ events })
     }).catch(err => {
       console.log(err)
     })
   }
 
   render() {
+    const eventList = this.state.events.map(event => {
+      return <li className="events__list__item" key={event._id}>{event.title}</li>
+    })
     return (
       <React.Fragment>
         {this.state.creating && (
@@ -109,6 +155,7 @@ class EventsPage extends Component {
           <p>Share your own Events!</p>
           <button className="btn" onClick={this.createEventHandler}>Create Event</button>
         </div>}
+        <ul className="events__list">{eventList}</ul>
       </React.Fragment>
     )
   }
