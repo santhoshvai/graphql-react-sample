@@ -9,8 +9,10 @@ import Spinner from '../components/Spinner/Spinner'
 class EventsPage extends Component {
   state = {
     creating: false,
+    detailVisiting: false,
     events: [],
-    isLoading: false
+    isLoading: false,
+    selectedEvent: null,
   }
 
   // react will automatically populate this.context now
@@ -33,7 +35,7 @@ class EventsPage extends Component {
   }
 
   handleOnCancel = () => {
-    this.setState({ creating: false })
+    this.setState({ creating: false, detailVisiting: false })
   }
 
   handleOnConfirm = () => {
@@ -95,6 +97,10 @@ class EventsPage extends Component {
     })
   }
 
+  handleOnDetailPress = event => {
+    this.setState({ detailVisiting: true, selectedEvent: event })
+  }
+
   fetchEvents() {
     this.setState({ isLoading: true })
     const requestBody = {
@@ -141,7 +147,7 @@ class EventsPage extends Component {
         {this.state.creating && (
           <React.Fragment>
             <Backdrop />
-            <Modal title="Add Event" canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnConfirm}>
+            <Modal title="Add Event" canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnConfirm} confirmText="Cancel">
               <form onSubmit={this.submitHandler}>
                 <div className="form-control">
                   <label htmlFor={"title"}>Title</label>
@@ -163,11 +169,21 @@ class EventsPage extends Component {
             </Modal>
           </React.Fragment>
         )}
+        {this.state.detailVisiting && (
+          <React.Fragment>
+            <Backdrop />
+            <Modal title={this.state.selectedEvent.title} canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnBook} confirmText="Book Event">
+              <h1>{this.state.selectedEvent.title}</h1>
+              <h2>{`$${this.state.selectedEvent.price} - ${(new Date(this.state.selectedEvent.date)).toLocaleDateString()}`}</h2>
+              <p>{this.state.selectedEvent.description}</p>
+            </Modal>
+          </React.Fragment>
+        )}
         {this.context.token && <div className="events-control">
           <p>Share your own Events!</p>
           <button className="btn" onClick={this.createEventHandler}>Create Event</button>
         </div>}
-        {this.state.isLoading ? <Spinner /> : <EventList events={this.state.events} />}
+        {this.state.isLoading ? <Spinner /> : <EventList events={this.state.events} onDetailPress={this.handleOnDetailPress} />}
       </React.Fragment>
     )
   }

@@ -16,7 +16,7 @@ class EventListItem extends React.Component {
           <h2>{`$${price} - ${dateStr}`}</h2>
         </div>
         <div>
-          {!isOwner && <button className={"btn"}>View Details</button>}
+          {!isOwner && <button className={"btn"} onClick={this.props.onDetailPress}>View Details</button>}
           {isOwner && <p>You are the owner of this event</p>}
         </div>
       </li>
