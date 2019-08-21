@@ -7,6 +7,9 @@ import EventList from '../components/EventList/EventList'
 import Spinner from '../components/Spinner/Spinner'
 
 class EventsPage extends Component {
+  // react will automatically populate this.context now
+  static contextType = AuthContext;
+
   state = {
     creating: false,
     detailVisiting: false,
@@ -15,8 +18,7 @@ class EventsPage extends Component {
     selectedEvent: null,
   }
 
-  // react will automatically populate this.context now
-  static contextType = AuthContext;
+  isActive = true
 
   constructor(props) {
     super(props)
@@ -28,6 +30,10 @@ class EventsPage extends Component {
 
   componentDidMount() {
     this.fetchEvents()
+  }
+
+  componentWillUnmount() {
+    this.isActive = false
   }
 
   createEventHandler = () => {
@@ -174,6 +180,7 @@ class EventsPage extends Component {
       }
       return res.json()
     }).then(resData => {
+      if (!this.isActive) return
       const events = resData.data.events
       this.setState({ events, isLoading: false })
     }).catch(err => {
