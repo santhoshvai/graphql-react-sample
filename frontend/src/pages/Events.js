@@ -7,6 +7,9 @@ import EventList from '../components/EventList/EventList'
 import Spinner from '../components/Spinner/Spinner'
 
 class EventsPage extends Component {
+  // react will automatically populate this.context now
+  static contextType = AuthContext;
+
   state = {
     creating: false,
     detailVisiting: false,
@@ -15,8 +18,7 @@ class EventsPage extends Component {
     selectedEvent: null,
   }
 
-  // react will automatically populate this.context now
-  static contextType = AuthContext;
+  isActive = true
 
   constructor(props) {
     super(props)
@@ -30,12 +32,57 @@ class EventsPage extends Component {
     this.fetchEvents()
   }
 
+  componentWillUnmount() {
+    this.isActive = false
+  }
+
   createEventHandler = () => {
     this.setState({ creating: true })
   }
 
   handleOnCancel = () => {
     this.setState({ creating: false, detailVisiting: false })
+  }
+
+  handleOnBook = () => {
+    const token = this.context.token
+    if (!token) {
+      // this was an "OK button click", so just close the modal
+      this.setState({ selectedEvent: null, detailVisiting: false })
+      return
+    }
+    const { selectedEvent } = this.state
+    const requestBody = {
+      query: `
+        mutation {
+          bookEvent(eventId: "${selectedEvent._id}") {
+            _id
+            createdAt
+            updatedAt
+          }
+        }
+      `
+    }
+
+    fetch('http://localhost:8000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(res => {
+      if (res.status !== 200 && res.status !== 201) {
+        throw new Error('Failed')
+      }
+      return res.json()
+    }).then(resData => {
+      console.log(resData.data.bookEvent)
+      // close the modal
+      this.setState({ selectedEvent: null, detailVisiting: false })
+    }).catch(err => {
+      console.log(err)
+    })
   }
 
   handleOnConfirm = () => {
@@ -133,6 +180,7 @@ class EventsPage extends Component {
       }
       return res.json()
     }).then(resData => {
+      if (!this.isActive) return
       const events = resData.data.events
       this.setState({ events, isLoading: false })
     }).catch(err => {
@@ -142,6 +190,7 @@ class EventsPage extends Component {
   }
 
   render() {
+    const token = this.context.token
     return (
       <React.Fragment>
         {this.state.creating && (
@@ -172,7 +221,7 @@ class EventsPage extends Component {
         {this.state.detailVisiting && (
           <React.Fragment>
             <Backdrop />
-            <Modal title={this.state.selectedEvent.title} canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnBook} confirmText="Book Event">
+            <Modal title={this.state.selectedEvent.title} canCancel={!!token} canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnBook} confirmText={token ? "Book Event" : "Ok"}>
               <h1>{this.state.selectedEvent.title}</h1>
               <h2>{`$${this.state.selectedEvent.price} - ${(new Date(this.state.selectedEvent.date)).toLocaleDateString()}`}</h2>
               <p>{this.state.selectedEvent.description}</p>
