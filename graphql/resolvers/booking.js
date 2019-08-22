@@ -35,9 +35,9 @@ module.exports = {
   },
   /*
   mutation {
-    cancelBooking(eventId: "5cb78409c7d4e59672644537") {
+    cancelBooking(bookingId: "5cb78409c7d4e59672644537") {
       _id
-      createdId
+      title
     }
   }
   */
