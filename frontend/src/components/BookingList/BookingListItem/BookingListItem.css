@@ -1,0 +1,12 @@
+.booking__item {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #5101d1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.booking__item-data {
+  font-size: 1rem;
+}
