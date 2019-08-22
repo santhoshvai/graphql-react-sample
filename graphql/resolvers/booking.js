@@ -8,8 +8,8 @@ module.exports = {
       throw new Error('Unauthenticated')
     }
     try {
-      const dbBookings = await Booking.find()
-      console.log(dbBookings)
+      // fetch only the bookings done by the authenticated user
+      const dbBookings = await Booking.find({ user: req.userId })
       return dbBookings.map(booking => transformBooking(booking))
     } catch(error) {
       console.log(error)
@@ -48,7 +48,6 @@ module.exports = {
   try {
     // when using populate, mongoose will populate the right event reference for us
     const dbBooking = await Booking.findById(args.bookingId).populate('event')
-    console.log(dbBooking)
     const event = transformEvent(dbBooking.event)
     await Booking.deleteOne({ _id: args.bookingId })
     return event
