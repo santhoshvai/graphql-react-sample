@@ -21,6 +21,44 @@ class BookingsPage extends Component {
     this.isActive = false
   }
 
+  handleOnCancel = (booking) => {
+    this.setState({ isLoading: true })
+    const token = this.context.token
+    const requestBody = {
+      query: `
+        mutation {
+          cancelBooking(bookingId: "${booking._id}") {
+            _id
+            title
+          }
+        }
+      `
+    }
+
+    fetch('http://localhost:8000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(res => {
+      if (res.status !== 200 && res.status !== 201) {
+        throw new Error('Failed')
+      }
+      return res.json()
+    }).then(resData => {
+      if (!this.isActive) return
+      this.setState(prevState => {
+        // delete the booking from the state
+        const bookings = prevState.bookings.filter(prevBooking => prevBooking._id !== booking._id)
+        return { bookings, isLoading: false }
+      })
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
   fetchBookings() {
     this.setState({ isLoading: true })
     const requestBody = {
@@ -62,8 +100,7 @@ class BookingsPage extends Component {
   }
 
   render() {
-    return this.state.isLoading ? <Spinner /> : <BookingList bookings={this.state.bookings} />
-
+    return this.state.isLoading ? <Spinner /> : <BookingList bookings={this.state.bookings} onCancel={this.handleOnCancel} />
   }
 }
 
