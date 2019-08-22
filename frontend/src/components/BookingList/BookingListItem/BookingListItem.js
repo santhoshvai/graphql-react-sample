@@ -9,7 +9,7 @@ const bookingListItem = props => {
         {`${booking.event.title} - ${new Date(booking.createdAt).toLocaleDateString()}`}
       </div>
       <div className="booking__item-actions">
-        <button className="btn">Cancel</button>
+        <button className="btn" onClick={props.onCancel}>Cancel</button>
       </div>
     </li>
   )
