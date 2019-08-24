@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import AuthContext from '../context/auth-context';
 import Spinner from '../components/Spinner/Spinner'
 import BookingList from '../components/BookingList/BookingList'
+import BookingChart from '../components/BookingChart/BookingChart'
 
 class BookingsPage extends Component {
   static contextType = AuthContext;
@@ -9,6 +10,7 @@ class BookingsPage extends Component {
   state = {
     isLoading: false,
     bookings: [],
+    tab: "List",
   }
 
   isActive = true
@@ -102,8 +104,30 @@ class BookingsPage extends Component {
     })
   }
 
+  handleOnTabClick = tab => {
+    this.setState({ tab })
+  }
+
   render() {
-    return this.state.isLoading ? <Spinner /> : <BookingList bookings={this.state.bookings} onCancel={this.handleOnCancel} />
+    let content = <Spinner />
+    if (!this.state.isLoading) {
+      content = (
+        <React.Fragment>
+          <div>
+            <button onClick={() => this.handleOnTabClick("List")}>List</button>
+            <button onClick={() => this.handleOnTabClick("Chart")}>Chart</button>
+          </div>
+          <div>
+            {this.state.tab === "List" ? (
+              <BookingList bookings={this.state.bookings} onCancel={this.handleOnCancel} />
+            ) : (
+              <BookingChart bookings={this.state.bookings} />
+            )}
+          </div>
+        </React.Fragment>
+      )
+    }
+    return content
   }
 }
 
