@@ -3,6 +3,7 @@ import AuthContext from '../context/auth-context';
 import Spinner from '../components/Spinner/Spinner'
 import BookingList from '../components/BookingList/BookingList'
 import BookingChart from '../components/BookingChart/BookingChart'
+import BookingTabs from '../components/BookingTabs/BookingTabs'
 
 class BookingsPage extends Component {
   static contextType = AuthContext;
@@ -113,10 +114,7 @@ class BookingsPage extends Component {
     if (!this.state.isLoading) {
       content = (
         <React.Fragment>
-          <div>
-            <button onClick={() => this.handleOnTabClick("List")}>List</button>
-            <button onClick={() => this.handleOnTabClick("Chart")}>Chart</button>
-          </div>
+          <BookingTabs activeTab={this.state.tab} onTabClick={this.handleOnTabClick} />
           <div>
             {this.state.tab === "List" ? (
               <BookingList bookings={this.state.bookings} onCancel={this.handleOnCancel} />
