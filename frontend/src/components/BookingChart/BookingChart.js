@@ -22,7 +22,6 @@ const CHART_COLOR_40 = 'rgba(81,1,209,0.4)'
 const CHART_COLOR_20 = 'rgba(81,1,209,0.2)'
 
 const bookingChart = props => {
-  const outputCounts = {}
   const labels = []
   const counts = []
   for (const bucket in BOOKING_BUCKETS) {
@@ -36,7 +35,6 @@ const bookingChart = props => {
     }, 0)
     labels.push(bucket)
     counts.push(count)
-    outputCounts[bucket] = count
   }
 
   const data = {
@@ -63,7 +61,6 @@ const bookingChart = props => {
         }]
     }
   }
-  console.log(outputCounts)
   return (
     <div className="chart">
       <Bar

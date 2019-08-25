@@ -14,7 +14,6 @@ module.exports = {
   events: async () => {
     try {
       const dbEvents = await Event.find()
-      console.log(dbEvents)
       return dbEvents.map(event => transformEvent(event))
     } catch(err) {
       console.log(err)
