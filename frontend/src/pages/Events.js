@@ -100,7 +100,7 @@ class EventsPage extends Component {
 
     const requestBody = {
       query: `
-        mutation CreateEvent($title: String!, $description: String!, $price: String!, date: String!) {
+        mutation CreateEvent($title: String!, $description: String!, $price: Float!, $date: String!) {
           createEvent(eventInput: {title: $title, description: $description, price: $price, date: $date}) {
             _id
             title
@@ -113,7 +113,7 @@ class EventsPage extends Component {
       variables: {
         title,
         description,
-        price,
+        price: Number(price),
         date
       }
     }
@@ -205,7 +205,7 @@ class EventsPage extends Component {
         {this.state.creating && (
           <React.Fragment>
             <Backdrop />
-            <Modal title="Add Event" canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnConfirm} confirmText="Cancel">
+            <Modal title="Add Event" canCancel canConfirm onCancel={this.handleOnCancel} onConfirm={this.handleOnConfirm} confirmText="Add">
               <form onSubmit={this.submitHandler}>
                 <div className="form-control">
                   <label htmlFor={"title"}>Title</label>

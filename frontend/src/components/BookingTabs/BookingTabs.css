@@ -1,0 +1,23 @@
+.booking-tabs {
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.booking-tabs button {
+  font: inherit;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: black;
+  background: transparent;
+  padding: 0.25rem 3rem;
+  cursor: pointer;
+}
+
+.booking-tabs button.active {
+  border-bottom-color: #5101d1;
+  color: #5101d1;
+}
+
+.booking-tabs button:focus {
+  outline: none;
+}
