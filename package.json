@@ -23,7 +23,7 @@
     "react-chartjs-2": "^2.7.6"
   },
   "devDependencies": {
-    "eslint": "^6.2.2",
+    "eslint": "^6.5.1",
     "nodemon": "^1.19.1"
   }
 }
